@@ -46,7 +46,7 @@ class EmotionModel(Wav2Vec2PreTrainedModel):
             self,
             input_values,
     ):
-        outputs = self.wav2vec2(input_values)
+        outputs = self.wav2vec2(input_values.reshape(1, len(input_values)))
         hidden_states = outputs[0]
         hidden_states = torch.mean(hidden_states, dim=1)
         logits = self.classifier(hidden_states)
@@ -108,13 +108,13 @@ def extract_dir(path):
 
 
 def extract_wav(path):
-    wav, sr = librosa.load(path, 16000)
+    wav, sr = librosa.load(path, sr=16000)
     emb = process_func(np.expand_dims(wav, 0), sr, embeddings=True)
     return emb
 
 
 def preprocess_one(path):
-    wav, sr = librosa.load(path, 16000)
+    wav, sr = librosa.load(path, sr=16000)
     emb = process_func(np.expand_dims(wav, 0), sr, embeddings=True)
     np.save(f"{path}.emo.npy", emb.squeeze(0))
     return emb
